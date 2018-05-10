@@ -6,11 +6,6 @@ import withStyles from "material-ui/es/styles/withStyles";
 import purple from "material-ui/es/colors/purple";
 import createMuiTheme from "material-ui/es/styles/createMuiTheme";
 import green from "material-ui/es/colors/green";
-import Flickr from 'flickr-sdk';
-
-const API_KEY = process.env.REACT_APP_API_KEY;
-
-const flickr = new Flickr(API_KEY);
 
 const styles = theme => ({
     container: {
@@ -66,7 +61,7 @@ class Search extends Component {
         console.log("Search for: ", this.state.inputValue);
         let phrase = this.state.inputValue;
 
-        flickr.photos.search({
+        this.props.flickr.photos.search({
             text: phrase
         }).then(function (res) {
             console.log(res.body);

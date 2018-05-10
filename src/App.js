@@ -2,6 +2,13 @@ import React, {Component} from 'react';
 import './App.css';
 import Search from "./components/Search";
 import TitleBar from "./components/TitleBar";
+import LayoutGrid from "./components/LayoutGrid";
+
+import Flickr from 'flickr-sdk';
+
+const API_KEY = process.env.REACT_APP_API_KEY;
+
+const flickr = new Flickr(API_KEY);
 
 class App extends Component {
     render() {
@@ -11,7 +18,8 @@ class App extends Component {
                     <TitleBar/>
                 </header>
                 <div>
-                    <Search/>
+                    <Search flickr={flickr}/>
+                    <LayoutGrid flickr={flickr}/>
                 </div>
             </div>
         );
