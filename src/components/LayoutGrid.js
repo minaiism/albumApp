@@ -2,12 +2,11 @@ import React, {Component} from 'react';
 import PropTypes from "prop-types";
 import {withStyles} from "material-ui/styles";
 import Grid from "material-ui/Grid";
-import SearchResults from "./SearchResults";
+import Results from "./Results";
 
 const styles = theme => ({
     root: {
         display: "inline-block"
-
     },
     demo: {
         height: 240
@@ -41,7 +40,10 @@ class LayoutGrid extends Component {
                         justify={justify}
                     >
                         <Grid key="Search results" item>
-                            <SearchResults flickr={this.props.flickr}/>
+                            <Results flickr={this.props.flickr} title={"Search results"}/>
+                        </Grid>
+                        <Grid key="Favorite" item>
+                            <Results title={"Favorites"}/>
                         </Grid>
                     </Grid>
                 </Grid>

@@ -19,6 +19,8 @@ class App extends Component {
                 </header>
                 <div>
                     <Search flickr={flickr}/>
+                    <br/>
+                    <br/>
                     <LayoutGrid flickr={flickr}/>
                 </div>
             </div>

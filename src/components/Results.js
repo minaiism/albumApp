@@ -19,19 +19,26 @@ const styles = theme => ({
     root: {
         flexWrap: 'wrap',
         justifyContent: 'space-around',
-        overflow: 'hidden',
         backgroundColor: theme.palette.background.paper,
+        overflow: 'hidden'
     },
     gridList: {
         width: 500,
         height: 450,
+        scrollWidth: '0px'
     },
     icon: {
         color: 'rgba(255, 255, 255, 0.54)',
     },
-    title: {
-        marginBottom: "10px"
+    track: {
+        height: "100%",
+        width: "100%",
+        textDecoration: "none",
+        border: "none"
     },
+    gridItem: {
+        padding: "20px"
+    }
 });
 
 class SearchResults extends Component {
@@ -87,7 +94,25 @@ class SearchResults extends Component {
 
     render() {
         const {classes} = this.props;
-        const loader = <div key={Math.random()} className="loader">Loading ...</div>;
+
+        if (this.props.flickr === undefined) {
+            return (
+                <div className={classes.root}>
+                    <GridList cellHeight={180} className={classes.gridList}>
+                        <GridListTile key="Subheader" cols={2} style={{height: 'auto'}}>
+                            <Subheader component="div">{this.props.title}</Subheader>
+                        </GridListTile>
+                        {["hi", "hi"].map(item => (
+                            <Grid className={classes.gridItem} key={Math.random()} item>
+                                <Paper className={classes.paper}>{item}</Paper>
+                            </Grid>
+                        ))}
+                    </GridList>
+                </div>
+            );
+        }
+
+        const loader = <div key={Math.random()} className="loader"/>;
 
         let items = [];
 
@@ -96,7 +121,6 @@ class SearchResults extends Component {
                 <div className="track" key={i}>
                     <a href={track.permalink_url} target="_blank">
                         <img src={track.artwork_url} width="150" height="150" alt="missing thumbnail"/>
-                        <p className={classes.title}>{track.title}</p>
                     </a>
                 </div>
             );
@@ -110,11 +134,12 @@ class SearchResults extends Component {
                 loader={loader}>
                 <div className={classes.root}>
                     <GridList cellHeight={180} className={classes.gridList}>
-                        <GridListTile key="Subheader" cols={2} style={{height: 'auto'}}>
-                            <Subheader component="div">December</Subheader>
+                        <GridListTile key="Subheader" cols={2}
+                                      style={{height: 'auto', position: 'sticky', top: 0, backgroundColor: 'white'}}>
+                            <Subheader component="div">{this.props.title}</Subheader>
                         </GridListTile>
                         {items.map(item => (
-                            <Grid key={Math.random()} item>
+                            <Grid className={classes.gridItem} key={Math.random()} item>
                                 <Paper className={classes.paper}>{item}</Paper>
                             </Grid>
                         ))}
