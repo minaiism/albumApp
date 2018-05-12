@@ -1,36 +1,36 @@
 import React, {Component} from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
-import Qwest from 'qwest';
 import PropTypes from 'prop-types';
 import {withStyles} from 'material-ui/styles';
-import './SearchResults.css';
 import Grid from "material-ui/es/Grid/Grid";
 import Paper from "material-ui/es/Paper/Paper";
 import GridList from "material-ui/es/GridList/GridList";
 import GridListTile from "material-ui/es/GridList/GridListTile";
 import Subheader from 'material-ui/List/ListSubheader';
 
-const api = {
-    baseUrl: 'https://api.soundcloud.com',
-    client_id: 'caf73ef1e709f839664ab82bef40fa96'
-};
+import Flickr from 'flickr-sdk';
+
+const API_KEY = process.env.REACT_APP_API_KEY;
+
+const flickr = new Flickr(API_KEY);
+
 
 const styles = theme => ({
     root: {
         flexWrap: 'wrap',
         justifyContent: 'space-around',
         backgroundColor: theme.palette.background.paper,
-        overflow: 'hidden'
+        overflow: 'hidden',
+        flexGrow: 1
     },
     gridList: {
-        width: 500,
-        height: 450,
-        scrollWidth: '0px'
+        width: 330,
+        height: 600,
     },
     icon: {
         color: 'rgba(255, 255, 255, 0.54)',
     },
-    track: {
+    item: {
         height: "100%",
         width: "100%",
         textDecoration: "none",
@@ -46,56 +46,85 @@ class SearchResults extends Component {
         super(props);
 
         this.state = {
-            tracks: [],
+            items: [],
             hasMoreItems: true,
-            nextHref: null
         };
+
+        this.loadMore = this.loadMore.bind(this);
+    }
+
+    static async fetchImages(photoId) {
+        return await flickr.photos.getSizes({
+            photo_id: photoId
+        });
+    }
+
+    loadMore() {
+        this.setState({
+            hasMoreItems: true
+        });
     }
 
     loadItems(page) {
-        let self = this;
+        const self = this;
 
-        let url = api.baseUrl + '/users/8665091/favorites';
-        if (this.state.nextHref) {
-            url = this.state.nextHref;
-        }
+        flickr.photos.search({
+            text: this.props.phrase,
+            page: page
+        }).then(res => {
+            if (page === res.body.photos.pages) {
+                self.setState({
+                    hasMoreItems: false
+                });
+            }
 
-        Qwest.get(url, {
-            client_id: api.client_id,
-            linked_partitioning: 1,
-            page_size: 10
-        }, {
-            cache: true
-        })
-            .then(function (xhr, resp) {
-                if (resp) {
-                    let tracks = self.state.tracks;
-                    resp.collection.map((track) => {
-                        if (track.artwork_url == null) {
-                            track.artwork_url = track.user.avatar_url;
+            let items = [...self.state.items];
+            let itemsLengthBefore = items.length;
+
+            let photos = [...res.body.photos.photo];
+
+            photos.forEach(photo => {
+                SearchResults.fetchImages(photo.id).then(resSizes => {
+                    resSizes.body.sizes.size.forEach(size => {
+                        if (size.width === "150") {
+                            items.push({
+                                id: photo.id,
+                                title: photo.title,
+                                owner: photo.owner,
+                                source: size.source,
+                                url: size.url,
+                            });
                         }
-
-                        return tracks.push(track);
                     });
-
-                    if (resp.next_href) {
+                }).catch(err => {
+                    console.log("Cannot get photo: " + photo.id + ". " + err);
+                }).finally(() => {
+                    if (items.length === itemsLengthBefore + photos.length) {
                         self.setState({
-                            tracks: tracks,
-                            nextHref: resp.next_href
-                        });
-                    } else {
-                        self.setState({
+                            items: items,
                             hasMoreItems: false
                         });
                     }
-                }
+                });
             });
+        }).catch(err => {
+            console.error(err);
+        });
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.phrase !== prevProps.phrase) {
+            this.setState({
+                items: [],
+                hasMoreItems: true
+            });
+        }
     }
 
     render() {
         const {classes} = this.props;
 
-        if (this.props.flickr === undefined) {
+        if (!this.props.phrase) {
             return (
                 <div className={classes.root}>
                     <GridList cellHeight={180} className={classes.gridList}>
@@ -114,17 +143,28 @@ class SearchResults extends Component {
 
         const loader = <div key={Math.random()} className="loader"/>;
 
-        let items = [];
+        let renderItems = [];
 
-        this.state.tracks.map((track, i) => {
-            return items.push(
-                <div className="track" key={i}>
-                    <a href={track.permalink_url} target="_blank">
-                        <img src={track.artwork_url} width="150" height="150" alt="missing thumbnail"/>
+        this.state.items.map((item, i) => {
+            return renderItems.push(
+                <div className="item" key={i}>
+                    <a href={item.url} target="_blank">
+                        <img src={item.source} width="150" height="150" title={item.title + " by " + item.owner}
+                             alt="missing thumbnail"/>
                     </a>
                 </div>
             );
         });
+
+        let loadMoreItem = () => {
+            if (!this.state.hasMoreItems) {
+                return (<Grid className={classes.gridItem} key={Math.random()} item>
+                    <Paper className={classes.paper}>{<button onClick={this.loadMore}
+                                                              style={{height: "150px", width: "150px"}}>View
+                        more</button>}</Paper>
+                </Grid>);
+            }
+        };
 
         return (
             <InfiniteScroll
@@ -133,16 +173,18 @@ class SearchResults extends Component {
                 hasMore={this.state.hasMoreItems}
                 loader={loader}>
                 <div className={classes.root}>
-                    <GridList cellHeight={180} className={classes.gridList}>
+                    <GridList cellHeight={155} className={classes.gridList}>
                         <GridListTile key="Subheader" cols={2}
                                       style={{height: 'auto', position: 'sticky', top: 0, backgroundColor: 'white'}}>
                             <Subheader component="div">{this.props.title}</Subheader>
                         </GridListTile>
-                        {items.map(item => (
+                        {renderItems.map(item => (
                             <Grid className={classes.gridItem} key={Math.random()} item>
                                 <Paper className={classes.paper}>{item}</Paper>
                             </Grid>
                         ))}
+                        {loadMoreItem()}
+
                     </GridList>
                 </div>
             </InfiniteScroll>

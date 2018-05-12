@@ -40,7 +40,7 @@ class LayoutGrid extends Component {
                         justify={justify}
                     >
                         <Grid key="Search results" item>
-                            <Results flickr={this.props.flickr} title={"Search results"}/>
+                            <Results title={"Search results"} phrase={this.props.phrase}/>
                         </Grid>
                         <Grid key="Favorite" item>
                             <Results title={"Favorites"}/>

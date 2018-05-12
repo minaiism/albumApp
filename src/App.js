@@ -4,13 +4,23 @@ import Search from "./components/Search";
 import TitleBar from "./components/TitleBar";
 import LayoutGrid from "./components/LayoutGrid";
 
-import Flickr from 'flickr-sdk';
-
-const API_KEY = process.env.REACT_APP_API_KEY;
-
-const flickr = new Flickr(API_KEY);
-
 class App extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            phrase: "dog"
+        };
+
+        this.setPhrase = this.setPhrase.bind(this);
+    }
+
+    setPhrase(newPhrase) {
+        this.setState({
+            phrase: newPhrase
+        });
+    }
+
     render() {
         return (
             <div className="App">
@@ -18,10 +28,10 @@ class App extends Component {
                     <TitleBar/>
                 </header>
                 <div>
-                    <Search flickr={flickr}/>
+                    <Search setState={this.setPhrase}/>
                     <br/>
                     <br/>
-                    <LayoutGrid flickr={flickr}/>
+                    <LayoutGrid phrase={this.state.phrase}/>
                 </div>
             </div>
         );

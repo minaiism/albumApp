@@ -48,6 +48,7 @@ class Search extends Component {
 
         this.onInputChange = this.onInputChange.bind(this);
         this.handleSearch = this.handleSearch.bind(this);
+        this.doSearch = this.doSearch.bind(this);
     }
 
     onInputChange(event) {
@@ -56,18 +57,15 @@ class Search extends Component {
         });
     }
 
-
     handleSearch() {
-        console.log("Search for: ", this.state.inputValue);
         let phrase = this.state.inputValue;
+        this.props.setState(phrase);
+    }
 
-        this.props.flickr.photos.search({
-            text: phrase
-        }).then(function (res) {
-            console.log(res.body);
-        }).catch(function (err) {
-            console.error(err);
-        });
+    doSearch(e) {
+        if (e.key === "Enter") {
+            this.handleSearch();
+        }
     }
 
     render() {
@@ -82,7 +80,8 @@ class Search extends Component {
                         id="mui-theme-provider-input"
                         InputProps={{
                             value: this.state.inputValue,
-                            onChange: this.onInputChange
+                            onChange: this.onInputChange,
+                            onKeyUp: this.doSearch
                         }}
                     />
                     <i className={["material-icons", classes.searchIcon].join(" ")}
