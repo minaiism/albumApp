@@ -18,7 +18,7 @@ function TitleBar(props) {
             <AppBar position="static" color="default">
                 <Toolbar>
                     <Typography variant="title" color="inherit">
-                        Album App
+                        Album App <i class="far fa-images"></i>
                     </Typography>
                 </Toolbar>
             </AppBar>

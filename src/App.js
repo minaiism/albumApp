@@ -24,9 +24,7 @@ class App extends Component {
     render() {
         return (
             <div className="App">
-                <header className="App-header">
                     <TitleBar/>
-                </header>
                 <div>
                     <Search setState={this.setPhrase}/>
                     <br/>
