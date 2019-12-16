@@ -1,7 +1,5 @@
 ## Album App (Flickr API)
 
-Go here https://my-album-app.herokuapp.com/ for live demo.
-
 From now on you can add pictures you like the most to your Favourite list  :relaxed:
 
 ### Developed With:
